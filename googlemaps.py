@@ -236,18 +236,13 @@ class GoogleMapsScraper:
             relative_date = None
 
         try:
-            n_reviews_photos = review.find('div', class_='section-review-subtitle').find_all('span')[1].text
-            metadata = n_reviews_photos.split('\xe3\x83\xbb')
-            if len(metadata) == 3:
-                n_photos = int(metadata[2].split(' ')[0].replace('.', ''))
-            else:
-                n_photos = 0
-             idx = len(metadata)
-            n_reviews = int(metadata[idx - 1].split(' ')[0].replace('.', ''))
+            n_reviews_photos = review.find('img', class_='NBa7we')
+            string = str(n_reviews_photos)
+            x_start = string.find('src=') + 5
+            x_end = len(string) - 3
+            n_photos = string[x_start:x_end]
 
         except Exception as e:
-        print(e)
-            n_reviews = 0
             n_photos = 0
 
         try:
@@ -267,7 +262,6 @@ class GoogleMapsScraper:
         item['retrieval_date'] = datetime.now()
         item['rating'] = rating
         item['username'] = username
-        item['n_review_user'] = n_reviews
         item['n_photo_user'] = n_photos
         item['url_user'] = user_url
 
