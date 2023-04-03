@@ -158,7 +158,7 @@ class GoogleMapsScraper:
 
 
 
-    def get_reviews(self, offset):
+    def get_reviews(self, offset, url):
 
         # scroll to load reviews
 
@@ -178,10 +178,10 @@ class GoogleMapsScraper:
         parsed_reviews = []
         for index, review in enumerate(rblock):
             if index >= offset:
-                parsed_reviews.append(self.__parse(review))
+                parsed_reviews.append(self.__parse(review, url))
 
                 # logging to std out
-                print(self.__parse(review))
+                print(self.__parse(review, url))
 
         return parsed_reviews
 
@@ -200,7 +200,7 @@ class GoogleMapsScraper:
         return place_data
 
 
-    def __parse(self, review):
+    def __parse(self, review, url):
 
         item = {}
 
@@ -262,8 +262,9 @@ class GoogleMapsScraper:
         item['retrieval_date'] = datetime.now()
         item['rating'] = rating
         item['username'] = username
+#         item['n_review_user'] = n_reviews
         item['n_photo_user'] = n_photos
-        item['url_user'] = user_url
+        item['n_url'] = url
 
         return item
 

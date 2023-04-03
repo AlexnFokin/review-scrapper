@@ -8,8 +8,8 @@ import time
 
 
 ind = {'most_relevant' : 0 , 'newest' : 1, 'highest_rating' : 2, 'lowest_rating' : 3 }
-HEADER = ['id_review', 'caption', 'relative_date', 'retrieval_date', 'rating', 'username', 'n_review_user', 'n_photo_user', 'url_user']
-HEADER_W_SOURCE = ['id_review', 'caption', 'relative_date','retrieval_date', 'rating', 'username', 'n_review_user', 'n_photo_user', 'url_user', 'url_source']
+HEADER = ['id_review', 'caption', 'relative_date', 'retrieval_date', 'rating', 'username', 'n_photo_user', 'n_url', 'url_user']
+HEADER_W_SOURCE = ['id_review', 'caption', 'relative_date','retrieval_date', 'rating', 'username', 'n_photo_user', 'n_url', 'url_user', 'url_source']
 
 def csv_writer(source_field, ind_sort_by, path='data/'):
     outfile= ind_sort_by + '_gm_reviews.csv'
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                         # logging to std out
                         print(colored('[Review ' + str(n) + ']', 'cyan'))
 
-                        reviews = scraper.get_reviews(n)
+                        reviews = scraper.get_reviews(n, url)
                         if len(reviews) == 0:
                             break
 
