@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
 import pandas as pd
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -17,7 +19,7 @@ import logging
 import traceback
 import numpy as np
 import itertools
-
+from urllib.parse import unquote
 
 GM_WEBPAGE = 'https://www.google.com/maps/'
 MAX_WAIT = 10
@@ -53,11 +55,13 @@ class GoogleMapsScraper:
         # open dropdown menu
         clicked = False
         tries = 0
+        actions = ActionChains(self.driver)
         while not clicked and tries < MAX_RETRY:
             try:
-                menu_bt = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@data-value=\'Sort\']')))
+                menu_bt: WebElement = wait.until(EC.presence_of_element_located((By.XPATH,
+                                                                                 '//button[@data-value=\'Sort\']')))
+                actions.move_to_element(menu_bt).perform()
                 menu_bt.click()
-
                 clicked = True
                 time.sleep(3)
             except Exception as e:
@@ -70,6 +74,7 @@ class GoogleMapsScraper:
 
         #  element of the list specified according to ind
         recent_rating_bt = self.driver.find_elements_by_xpath('//div[@role=\'menuitemradio\']')[ind]
+        actions.move_to_element(recent_rating_bt).perform()
         recent_rating_bt.click()
 
         # wait to load review (ajax call)
@@ -93,11 +98,12 @@ class GoogleMapsScraper:
 
         for i, search_point_url in enumerate(search_point_url_list):
 
-            if (i+1) % 10 == 0:
+            if (i + 1) % 10 == 0:
                 print(f"{i}/{len(search_point_url_list)}")
-                df_places = df_places[['search_point_url', 'href', 'name', 'rating', 'num_reviews', 'close_time', 'other']]
+                df_places = df_places[
+                    ['search_point_url', 'href', 'name', 'rating', 'num_reviews', 'close_time', 'other',
+                     'location_name']]
                 df_places.to_csv('output/places_wax.csv', index=False)
-
 
             try:
                 self.driver.get(search_point_url)
@@ -108,7 +114,7 @@ class GoogleMapsScraper:
 
             # Gambiarra to load all places into the page
             scrollable_div = self.driver.find_element_by_css_selector(
-                "div.siAUzd-neVct.section-scrollbox.cYB2Ge-oHo7ed.cYB2Ge-ti6hGc > div[aria-label*='Results for']")
+                "div[aria-label*='Results for']")
             for i in range(10):
                 self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', scrollable_div)
 
@@ -118,6 +124,10 @@ class GoogleMapsScraper:
             div_places = response.select('div[jsaction] > a[href]')
             # print(len(div_places))
             for div_place in div_places:
+                location_name = div_place['href']
+                location_name = location_name.replace('https://www.google.com/maps/place/', '')
+                location_name = unquote(location_name.split('/')[0])
+                location_name = re.sub('\+', ' ', location_name)
                 place_info = {
                     'search_point_url': search_point_url.replace('https://www.google.com/maps/search/', ''),
                     'href': div_place['href'],
@@ -125,11 +135,13 @@ class GoogleMapsScraper:
                     'rating': None,
                     'num_reviews': None,
                     'close_time': None,
-                    'other': None
+                    'other': None,
+                    'location_name': location_name,
                 }
 
                 df_places = df_places.append(place_info, ignore_index=True)
-        df_places = df_places[['search_point_url', 'href', 'name', 'rating', 'num_reviews', 'close_time', 'other']]
+        df_places = df_places[
+            ['search_point_url', 'href', 'name', 'rating', 'num_reviews', 'close_time', 'other', 'location_name']]
         df_places.to_csv('output/places_wax.csv', index=False)
         self.driver.quit()
 
@@ -174,7 +186,7 @@ class GoogleMapsScraper:
         # parse reviews
         response = BeautifulSoup(self.driver.page_source, 'html.parser')
         # TODO: Subject to changes
-        rblock = response.find_all('div', class_='jftiEf fontBodyMedium')
+        rblock = response.find_all('div', class_=('jftiEf', 'fontBodyMedium'))
         parsed_reviews = []
         for index, review in enumerate(rblock):
             if index >= offset:
@@ -264,7 +276,12 @@ class GoogleMapsScraper:
         item['username'] = username
 #         item['n_review_user'] = n_reviews
         item['n_photo_user'] = n_photos
-        item['n_url'] = url
+
+        str = url.replace('https://www.google.com/maps/place/', '')
+        idx = str.find('/data')
+        ns = str[:idx]
+        ns = ns.replace('+', ' ')
+        item['n_url'] = ns
 
         return item
 
