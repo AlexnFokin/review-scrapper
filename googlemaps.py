@@ -20,6 +20,7 @@ import traceback
 import numpy as np
 import itertools
 from urllib.parse import unquote
+from urllib import parse
 
 GM_WEBPAGE = 'https://www.google.com/maps/'
 MAX_WAIT = 10
@@ -237,7 +238,11 @@ class GoogleMapsScraper:
 
         try:
             # TODO: Subject to changes
-            rating = float(review.find('span', class_='kvMYJc')['aria-label'].split(' ')[1])
+            rating = review.find('span', class_='kvMYJc')
+            rat = rating.get('aria-label')
+            rat = rat.replace('stars', '')
+            rat = rat.replace('star', '')
+            rating = rat
         except Exception as e:
             rating = None
 
@@ -249,10 +254,8 @@ class GoogleMapsScraper:
 
         try:
             n_reviews_photos = review.find('img', class_='NBa7we')
-            string = str(n_reviews_photos)
-            x_start = string.find('src=') + 5
-            x_end = len(string) - 3
-            n_photos = string[x_start:x_end]
+            src = n_reviews_photos.get('src')
+            n_photos = src
 
         except Exception as e:
             n_photos = 0
@@ -261,6 +264,15 @@ class GoogleMapsScraper:
             user_url = review.find('a')['href']
         except Exception as e:
             user_url = None
+
+        try:
+            all_params = parse.urlparse(url)
+            query = all_params.query
+            substr = '&place='
+            params = query.split(substr)
+            place_id = params[1]
+        except Exception as e:
+            place_id = None
 
         item['id_review'] = id_review
         item['caption'] = review_text
@@ -281,7 +293,10 @@ class GoogleMapsScraper:
         idx = str.find('/data')
         ns = str[:idx]
         ns = ns.replace('+', ' ')
+
         item['n_url'] = ns
+        item['place_id'] = place_id
+        item['url_user'] = user_url
 
         return item
 
