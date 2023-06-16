@@ -12,15 +12,15 @@ HEADER = ['id_review', 'caption', 'relative_date', 'retrieval_date', 'rating', '
 HEADER_W_SOURCE = ['id_review', 'caption', 'relative_date','retrieval_date', 'rating', 'username', 'n_photo_user', 'n_url', 'url_user', 'place_id', 'url_source']
 
 def csv_writer(source_field, ind_sort_by, path='data/'):
-    outfile= ind_sort_by + '_gm_reviews.csv'
-    targetfile = open(path + outfile, mode='w', encoding='utf-8', newline='\n')
-    writer = csv.writer(targetfile, quoting=csv.QUOTE_MINIMAL)
+    outfile = ind_sort_by + '_gm_reviews.csv'
+    target_file = open(path + outfile, mode='w', encoding='utf-8', newline='\n')
 
     if source_field:
         h = HEADER_W_SOURCE
     else:
         h = HEADER
-    writer.writerow(h)
+    writer = csv.DictWriter(target_file, fieldnames=h)
+    writer.writeheader()
 
     return writer
 
@@ -65,10 +65,9 @@ if __name__ == '__main__':
                             break
 
                         for r in reviews:
-                            row_data = list(r.values())
+                            row_data = r.copy()
                             if args.source:
-                                row_data.append(url[:-1])
-
+                                row_data['url_source'] = url[:-1]
                             writer.writerow(row_data)
 
                         n += len(reviews)
