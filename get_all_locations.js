@@ -133,7 +133,7 @@ const locationsArr = [
     "SaludVIP Ocala - Silver Springs Shores",
     "SaludVIP Fort Pierce - Coral Square",
     "SaludVIP San Antonio - Monticello Park - Coming soon!",
-    "SaludVIP San Antonio - South Park Plaza﻿ - Coming Soon!",
+    "SaludVIP San Antonio - South Park Plaza - Coming Soon!",
     "SaludVIP San Antonio - Northwest - Coming soon!",
     "SaludVIP San Antonio - Questa Loma - Coming Soon!",
     "SaludVIP San Antonio - Austin Heights - Coming soon!",
