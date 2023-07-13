@@ -292,6 +292,7 @@ class GoogleMapsScraper:
         str = url.replace('https://www.google.com/maps/place/', '')
         idx = str.find('/data')
         ns = str[:idx]
+        ns = ns.replace('++', ' ')
         ns = ns.replace('+', ' ')
 
         item['n_url'] = ns
