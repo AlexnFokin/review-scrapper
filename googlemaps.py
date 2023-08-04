@@ -321,7 +321,6 @@ class GoogleMapsScraper:
     def __expand_reviews(self):
         # use XPath to load complete reviews
         # TODO: Subject to changes
-        # links = self.driver.find_elements_by_xpath('//button[@jsaction="pane.review.expandReview"]')
         links = self.driver.find_elements(By.XPATH, '//button[@jsaction="pane.review.expandReview"]')
 
         for l in links:
