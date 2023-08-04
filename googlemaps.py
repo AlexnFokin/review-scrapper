@@ -74,7 +74,7 @@ class GoogleMapsScraper:
                 return -1
 
         #  element of the list specified according to ind
-        recent_rating_bt = self.driver.find_elements_by_xpath('//div[@role=\'menuitemradio\']')[ind]
+        recent_rating_bt = self.driver.find_elements("xpath", '//div[@role=\'menuitemradio\']')[ind]
         actions.move_to_element(recent_rating_bt).perform()
         recent_rating_bt.click()
 
@@ -321,7 +321,9 @@ class GoogleMapsScraper:
     def __expand_reviews(self):
         # use XPath to load complete reviews
         # TODO: Subject to changes
-        links = self.driver.find_elements_by_xpath('//button[@jsaction="pane.review.expandReview"]')
+        # links = self.driver.find_elements_by_xpath('//button[@jsaction="pane.review.expandReview"]')
+        links = self.driver.find_elements(By.XPATH, '//button[@jsaction="pane.review.expandReview"]')
+
         for l in links:
             l.click()
         time.sleep(2)
@@ -329,7 +331,7 @@ class GoogleMapsScraper:
 
     def __scroll(self):
         # TODO: Subject to changes
-        scrollable_div = self.driver.find_element_by_css_selector('div.m6QErb.DxyBCb.kA9KIf.dS8AEf')
+        scrollable_div = self.driver.find_element("css selector", "div.m6QErb.DxyBCb.kA9KIf.dS8AEf")
         self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', scrollable_div)
         #self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
@@ -365,7 +367,7 @@ class GoogleMapsScraper:
 
         options.add_argument("--disable-notifications")
         options.add_argument("--lang=en-GB")
-        input_driver = webdriver.Chrome(executable_path=ChromeDriverManager(log_level=0).install(), options=options)
+        input_driver = webdriver.Chrome(options=options)
 
          # click on google agree button so we can continue (not needed anymore)
          # EC.element_to_be_clickable((By.XPATH, '//span[contains(text(), "I agree")]')))
