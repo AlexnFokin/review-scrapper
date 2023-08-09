@@ -318,48 +318,66 @@ class GoogleMapsScraper:
         return place
 
     # expand review description
+    def __expand_reviews(self):
+        # use XPath to load complete reviews
+        # TODO: Subject to changes
+        links = self.driver.find_elements(By.XPATH, '//button[@jsaction="pane.review.expandReview"]')
+
+        for l in links:
+            l.click()
+            time.sleep(2)
+
     # def __expand_reviews(self):
-    #     # use XPath to load complete reviews
-    #     # TODO: Subject to changes
-    #     links = self.driver.find_elements(By.XPATH, '//button[@jsaction="pane.review.expandReview"]')
+    #     # Use explicit wait to wait for the buttons to be clickable
+    #     wait = WebDriverWait(self.driver, 10)
+        
+    #     # Find the expand review buttons
+    #     links = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//button[@jsaction="pane.review.expandReview"]')))
 
     #     for l in links:
-    #         l.click()
-    #         time.sleep(2)
-
-    def __expand_reviews(self):
-        # Use explicit wait to wait for the buttons to be clickable
-        wait = WebDriverWait(self.driver, 10)
-        
-        # Find the expand review buttons
-        links = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//button[@jsaction="pane.review.expandReview"]')))
-        print(len(links))
-        for l in links:
-            try:
-                # Scroll to the element
-                self.driver.execute_script("arguments[0].scrollIntoView();", l)
+    #         try:
+    #             # Scroll to the element
+    #             self.driver.execute_script("arguments[0].scrollIntoView();", l)
                 
-                # Wait for the element to be clickable
-                wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@jsaction="pane.review.expandReview"]')))
+    #             # Wait for the element to be clickable
+    #             wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@jsaction="pane.review.expandReview"]')))
                 
-                # Click on the element
-                l.click()
+    #             # Click on the element
+    #             l.click()
                 
-                # Wait briefly to allow content to load
-                time.sleep(2)
-            except Exception as e:
-                # Handle any exceptions that might occur during the process
-                print("Error:", e)
+    #             # Wait briefly to allow content to load
+    #             time.sleep(2)
+    #         except Exception as e:
+    #             # Handle any exceptions that might occur during the process
+    #             print("Error:", e)
 
 
 
 
     def __scroll(self):
         # TODO: Subject to changes
-        scrollable_div = self.driver.find_element("css selector", "div.m6QErb.DxyBCb.kA9KIf.dS8AEf")
-        self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', scrollable_div)
+        # scrollable_div = self.driver.find_element("css selector", "div.m6QErb.DxyBCb.kA9KIf.dS8AEf")
+        # self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', scrollable_div)
         #self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
+        try:
+            scrollable_div = self.driver.find_element(By.CSS_SELECTOR, "div.m6QErb.DxyBCb.kA9KIf.dS8AEf")
+                    
+            previous_height = self.driver.execute_script('return arguments[0].scrollHeight', scrollable_div)
+                    
+            while True:
+                self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', scrollable_div)
+                        
+                time.sleep(4)
+                        
+                current_height = self.driver.execute_script('return arguments[0].scrollHeight', scrollable_div)
+                     
+                if current_height == previous_height:
+                    break
+                       
+                previous_height = current_height
+                        
+        except Exception as e:
+            print("An error occurred:", str(e))
 
     def __get_logger(self):
         # create logger
