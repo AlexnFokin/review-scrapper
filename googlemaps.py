@@ -60,7 +60,7 @@ class GoogleMapsScraper:
         while not clicked and tries < MAX_RETRY:
             try:
                 menu_bt: WebElement = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                                 '//button[@data-value=\'Sort\']')))
+                                                                                 "//button[@data-value='Sort']")))
                 actions.move_to_element(menu_bt).perform()
                 menu_bt.click()
                 clicked = True
@@ -318,14 +318,40 @@ class GoogleMapsScraper:
         return place
 
     # expand review description
-    def __expand_reviews(self):
-        # use XPath to load complete reviews
-        # TODO: Subject to changes
-        links = self.driver.find_elements(By.XPATH, '//button[@jsaction="pane.review.expandReview"]')
+    # def __expand_reviews(self):
+    #     # use XPath to load complete reviews
+    #     # TODO: Subject to changes
+    #     links = self.driver.find_elements(By.XPATH, '//button[@jsaction="pane.review.expandReview"]')
 
+    #     for l in links:
+    #         l.click()
+    #         time.sleep(2)
+
+    def __expand_reviews(self):
+        # Use explicit wait to wait for the buttons to be clickable
+        wait = WebDriverWait(self.driver, 10)
+        
+        # Find the expand review buttons
+        links = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//button[@jsaction="pane.review.expandReview"]')))
+        print(len(links))
         for l in links:
-            l.click()
-        time.sleep(2)
+            try:
+                # Scroll to the element
+                self.driver.execute_script("arguments[0].scrollIntoView();", l)
+                
+                # Wait for the element to be clickable
+                wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@jsaction="pane.review.expandReview"]')))
+                
+                # Click on the element
+                l.click()
+                
+                # Wait briefly to allow content to load
+                time.sleep(2)
+            except Exception as e:
+                # Handle any exceptions that might occur during the process
+                print("Error:", e)
+
+
 
 
     def __scroll(self):
